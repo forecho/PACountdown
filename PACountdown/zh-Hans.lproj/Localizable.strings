@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  PACountdown
+
+  Created by Gemini on 2024/7/30.
+*/
+
+"Market is open" = "已开市";
+"Market is closed" = "已闭市";
+"5-Min Interval Countdown" = "5分钟周期倒计时";
+"Mute Notifications" = "关闭提醒";
+"Unmute Notifications" = "开启提醒";
+"Pre-notification time: %lld seconds" = "提前提醒时间: %lld 秒";
+"Test Sound" = "测试声音"; 

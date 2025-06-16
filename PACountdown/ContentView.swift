@@ -1,66 +1,94 @@
-//
-//  ContentView.swift
-//  PACountdown
-//
-//  Created by forecho on 2025/6/17.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @StateObject private var viewModel = TimerViewModel()
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        VStack(spacing: 20) {
+            // World Clock
+            VStack(spacing: 8) {
+                Text(viewModel.currentTime)
+                    .font(.system(size: 36, weight: .light, design: .monospaced))
+                    .foregroundColor(.primary)
+            }
+            .padding(.vertical, 20)
+            .frame(maxWidth: .infinity)
+            .background(Color(.windowBackgroundColor))
+            .cornerRadius(12)
+            
+            // Countdown Timer
+            VStack(spacing: 12) {
+                Text("5-Min Interval Countdown")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                
+                Text(timeString(time: viewModel.timeRemaining))
+                    .font(.system(size: 80, weight: .bold, design: .monospaced))
+                    .foregroundColor(.primary)
+                
+                Text(LocalizedStringKey(viewModel.marketStatusMessage))
+                    .font(.subheadline)
+                    .foregroundColor(viewModel.isTimerRunning ? .green : .red)
+            }
+            .padding(.vertical, 20)
+            .frame(maxWidth: .infinity)
+            .background(Color(.windowBackgroundColor))
+            .cornerRadius(12)
+
+            // Controls
+            VStack(spacing: 16) {
+                HStack(spacing: 12) {
+                    Button(action: {
+                        viewModel.toggleNotifications()
+                    }) {
+                        Label(viewModel.areNotificationsEnabled ? "Mute Notifications" : "Unmute Notifications",
+                              systemImage: viewModel.areNotificationsEnabled ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(viewModel.areNotificationsEnabled ? .orange : .indigo)
+                    
+                    Button(action: {
+                        viewModel.testSound()
+                    }) {
+                        Label("Test Sound", systemImage: "speaker.wave.2.fill")
+                    }
+                    .buttonStyle(.bordered)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Notification Settings")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                    
+                    Stepper(value: $viewModel.preNotificationSeconds, in: 1...60, step: 1) {
+                        Text(String(format: NSLocalizedString("Pre-notification time: %lld seconds", comment: ""), Int(viewModel.preNotificationSeconds)))
                     }
                 }
-                .onDelete(perform: deleteItems)
+                .padding(.horizontal, 8)
             }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
+            .padding(.vertical, 20)
+            .frame(maxWidth: .infinity)
+            .background(Color(.windowBackgroundColor))
+            .cornerRadius(12)
         }
+        .padding(20)
+        .frame(minWidth: 480, minHeight: 500)
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+    private func timeString(time: TimeInterval) -> String {
+        let minutes = Int(time) / 60 % 60
+        let seconds = Int(time) % 60
+        return String(format: "%02i:%02i", minutes, seconds)
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+extension TimeZone: @retroactive Identifiable {
+    public var id: String { identifier }
 }
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+} 

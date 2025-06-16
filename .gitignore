@@ -1,0 +1,55 @@
+# Xcode
+#
+# gitignore contributors: remember to keep this file platform-agnostic
+# gitignore test builds, just add the word 'test' to your build folder, e.g.
+#   mkdir build_test
+#   make test
+
+## User-specific files
+*.dSYM/
+*.tm_build/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/project.xcworkspace/
+!*.xcodeproj/xcshareddata/
+*.xccheckout
+*.xcscmblueprint
+*.xcschememanagement.plist
+xcuserdata/
+
+## Build generated
+build/
+DerivedData/
+Index/DataStore
+
+## Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Cocoapods
+Pods/
+
+# Carthage
+Carthage/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Temporary files
+*.swp
+*~.nib/
+*~
+*.dat
+*.strings.backup
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
