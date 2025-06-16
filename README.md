@@ -4,7 +4,7 @@ A 5-minute candlestick countdown timer for stock traders, built for macOS.
 
 This app provides a simple, clean interface to help traders track 5-minute intervals, synchronized with real-world market time.
 
-![App Screenshot](https://raw.githubusercontent.com/forecho/PACountdown/main/screenshot.png)
+![App Screenshot](https://img.forecho.com/06w2ew.png)
 
 ## Features
 

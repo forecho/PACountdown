@@ -4,7 +4,7 @@
 
 这款应用提供了一个简洁明了的界面，帮助交易员跟踪与真实市场时间同步的5分钟周期。
 
-![应用截图](https://raw.githubusercontent.com/forecho/PACountdown/main/screenshot.png)
+![应用截图](https://img.forecho.com/06w2ew.png)
 
 ## 功能特性
 
