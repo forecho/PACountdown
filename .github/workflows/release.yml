@@ -1,0 +1,50 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags like v1.0, v1.0.1, etc.
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create ExportOptions.plist
+      run: |
+        cat <<EOF > ExportOptions.plist
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>method</key>
+            <string>copy</string>
+            <key>destination</key>
+            <string>export</string>
+        </dict>
+        </plist>
+        EOF
+
+    - name: Build and Archive
+      run: |
+        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Release archive -archivePath ./build/PACountdown.xcarchive
+
+    - name: Export App
+      run: |
+        xcodebuild -exportArchive -archivePath ./build/PACountdown.xcarchive -exportPath ./build -exportOptionsPlist ExportOptions.plist
+
+    - name: Create Zip file
+      run: |
+        cd ./build
+        zip -r ../PACountdown.zip PACountdown.app
+    
+    - name: Create GitHub Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: PACountdown.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
