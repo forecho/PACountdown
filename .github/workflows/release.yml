@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # Trigger on tags like v1.0, v1.0.1, etc.
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: macos-15
