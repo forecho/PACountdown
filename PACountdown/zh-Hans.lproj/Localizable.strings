@@ -11,4 +11,10 @@
 "Mute Notifications" = "关闭提醒";
 "Unmute Notifications" = "开启提醒";
 "Pre-notification time: %lld seconds" = "提前提醒时间: %lld 秒";
-"Test Sound" = "测试声音"; 
+"Test Sound" = "测试声音";
+"US Market" = "美股市场";
+"Global (24/7)" = "全球市场（24/7）";
+"Always available (24/7)" = "始终可用（24/7）";
+"Market Mode" = "市场模式";
+"Switch to Global" = "切换到全球市场";
+"Switch to US" = "切换到美股市场"; 

@@ -11,4 +11,10 @@
 "Mute Notifications" = "Mute Notifications";
 "Unmute Notifications" = "Unmute Notifications";
 "Pre-notification time: %lld seconds" = "Pre-notification time: %lld seconds";
-"Test Sound" = "Test Sound"; 
+"Test Sound" = "Test Sound";
+"US Market" = "US Market";
+"Global (24/7)" = "Global (24/7)";
+"Always available (24/7)" = "Always available (24/7)";
+"Market Mode" = "Market Mode";
+"Switch to Global" = "Switch to Global";
+"Switch to US" = "Switch to US"; 

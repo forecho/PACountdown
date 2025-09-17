@@ -37,6 +37,16 @@ struct ContentView: View {
 
             // Controls
             VStack(spacing: 16) {
+                Button(action: {
+                    viewModel.marketMode = (viewModel.marketMode == .us) ? .global : .us
+                }) {
+                    Label(viewModel.marketMode == .us ? "Switch to Global" : "Switch to US",
+                          systemImage: viewModel.marketMode == .us ? "globe" : "flag")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(.secondary)
+
                 HStack(spacing: 12) {
                     Button(action: {
                         viewModel.toggleNotifications()

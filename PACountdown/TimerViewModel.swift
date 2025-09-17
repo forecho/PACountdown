@@ -4,11 +4,22 @@ import Combine
 import AppKit
 #endif
 
+enum MarketMode: String {
+    case us
+    case global
+}
+
 class TimerViewModel: ObservableObject {
     // Countdown Timer
     @Published var timeRemaining: TimeInterval = 300 // 5 minutes
     @Published var isTimerRunning = false
     @Published var marketStatusMessage: String = "Market is closed"
+    @Published var marketMode: MarketMode = .us {
+        didSet {
+            UserDefaults.standard.set(marketMode.rawValue, forKey: "marketMode")
+            checkMarketHours()
+        }
+    }
     
     // Notification Settings
     @Published var preNotificationSeconds: TimeInterval = 10 {
@@ -30,11 +41,19 @@ class TimerViewModel: ObservableObject {
     private let finalTickSound = NSSound(named: "Glass")
     #endif
     private var lastSecond: Int = -1
+    #if os(macOS)
+    private var lastTickPlayTime: Date = .distantPast
+    #endif
 
     init() {
         // Load saved settings
         if let savedSeconds = UserDefaults.standard.value(forKey: "preNotificationSeconds") as? Int {
             self.preNotificationSeconds = TimeInterval(savedSeconds)
+        }
+        if let savedMode = UserDefaults.standard.string(forKey: "marketMode"), let mode = MarketMode(rawValue: savedMode) {
+            self.marketMode = mode
+        } else {
+            self.marketMode = .us
         }
 
         formatter.dateFormat = "HH:mm:ss"
@@ -128,12 +147,18 @@ class TimerViewModel: ObservableObject {
     }
     
     private func checkMarketHours() {
-        if isMarketOpen() {
-            marketStatusMessage = "Market is open"
+        switch marketMode {
+        case .global:
+            marketStatusMessage = "Always available (24/7)"
             startTimer()
-        } else {
-            marketStatusMessage = "Market is closed"
-            stopTimer()
+        case .us:
+            if isMarketOpen() {
+                marketStatusMessage = "Market is open"
+                startTimer()
+            } else {
+                marketStatusMessage = "Market is closed"
+                stopTimer()
+            }
         }
     }
     
@@ -157,15 +182,26 @@ class TimerViewModel: ObservableObject {
     
     private func playTickSound() {
         #if os(macOS)
-        tickSound?.stop()
-        tickSound?.play()
+        let now = Date()
+        if now.timeIntervalSince(lastTickPlayTime) < 1.0 { return }
+        lastTickPlayTime = now
+        DispatchQueue.main.async {
+            self.tickSound?.stop()
+            if !(self.tickSound?.play() ?? false) {
+                NSSound.beep()
+            }
+        }
         #endif
     }
 
     private func playFinalTickSound() {
         #if os(macOS)
-        finalTickSound?.stop()
-        finalTickSound?.play()
+        DispatchQueue.main.async {
+            self.finalTickSound?.stop()
+            if !(self.finalTickSound?.play() ?? false) {
+                NSSound.beep()
+            }
+        }
         #endif
     }
 
