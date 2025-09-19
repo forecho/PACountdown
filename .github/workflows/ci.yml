@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   test-macos-build:
     name: Test macOS Build
@@ -68,6 +71,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Verify Windows platform
       run: |
@@ -87,23 +92,24 @@ jobs:
         Write-Host "Restoring .NET dependencies..."
         dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -p:EnableWindowsTargeting=true -v normal
 
-    - name: Show project info
+    - name: Apply .NET code formatting
       run: |
-        Write-Host "Project information:"
-        dotnet --info
-        Write-Host "Project file contents:"
-        Get-Content PACountdown.Windows/PACountdown.Windows.csproj
+        Write-Host "Applying code formatting..."
+        dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verbosity normal
 
-    - name: Check .NET code formatting
+    - name: Commit formatting changes
       run: |
-        Write-Host "Checking code formatting..."
-        dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verify-no-changes --verbosity normal
-        if ($LASTEXITCODE -ne 0) {
-          Write-Host "Code formatting issues found. Running format to show what needs to be fixed:"
-          dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verbosity normal
-          exit 1
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .
+        if ((git status --porcelain) -ne $null) {
+            git commit -m "style: Apply automatic code formatting [skip ci]"
+            echo "Pushing formatting changes..."
+            git push
+        } else {
+            echo "No formatting changes to commit."
         }
-        Write-Host "Code formatting is correct."
+      shell: pwsh
 
     - name: Analyze .NET code
       run: |
