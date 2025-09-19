@@ -29,7 +29,7 @@ public class MarketHoursService : IMarketHoursService
     {
         var easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
         var easternTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, easternTimeZone);
-        
+
         // Check if it's a weekday (Monday = 1, Friday = 5)
         var dayOfWeek = (int)easternTime.DayOfWeek;
         if (dayOfWeek < 1 || dayOfWeek > 5)
@@ -40,7 +40,7 @@ public class MarketHoursService : IMarketHoursService
         var marketOpenTimeInMinutes = 9 * 60 + 30; // 9:30 AM
         var marketCloseTimeInMinutes = 16 * 60;    // 4:00 PM
 
-        return currentTimeInMinutes >= marketOpenTimeInMinutes && 
+        return currentTimeInMinutes >= marketOpenTimeInMinutes &&
                currentTimeInMinutes < marketCloseTimeInMinutes;
     }
 }

@@ -27,10 +27,10 @@ public partial class App : Application
                 services.AddSingleton<ISettingsService, SettingsService>();
                 services.AddSingleton<IAudioService, AudioService>();
                 services.AddSingleton<IMarketHoursService, MarketHoursService>();
-                
+
                 // ViewModels
                 services.AddTransient<MainWindowViewModel>();
-                
+
                 // Views
                 services.AddTransient<MainWindow>();
             })

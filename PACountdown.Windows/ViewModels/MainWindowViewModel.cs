@@ -13,11 +13,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly ISettingsService _settingsService;
     private readonly IAudioService _audioService;
     private readonly IMarketHoursService _marketHoursService;
-    
+
     private readonly DispatcherTimer _countdownTimer;
     private readonly DispatcherTimer _marketHoursTimer;
     private readonly DispatcherTimer _clockTimer;
-    
+
     private int _lastSecond = -1;
 
     [ObservableProperty]
@@ -41,7 +41,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private string _currentTime = "--:--:--";
 
-    public string TimeRemainingDisplay => $"{_timeRemaining.Minutes:D2}:{_timeRemaining.Seconds:D2}";
+    public string TimeRemainingDisplay => $"{TimeRemaining.Minutes:D2}:{TimeRemaining.Seconds:D2}";
 
     public MainWindowViewModel(
         ISettingsService settingsService,
@@ -70,7 +70,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         // Start timers
         CheckMarketHours();
         UpdateCurrentTime();
-        
+
         _marketHoursTimer.Start();
         _clockTimer.Start();
     }
@@ -120,13 +120,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void OnCountdownTimerTick(object? sender, EventArgs e)
     {
         var currentSecond = DateTime.Now.Second;
-        
+
         if (currentSecond != _lastSecond)
         {
             _lastSecond = currentSecond;
-            
+
             TimeRemaining = TimeRemaining.Subtract(TimeSpan.FromSeconds(1));
-            
+
             if (TimeRemaining.TotalSeconds < 0)
             {
                 CalculateAndSetInitialTime();
@@ -167,7 +167,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void CheckMarketHours()
     {
         MarketStatusMessage = _marketHoursService.GetMarketStatusMessage(MarketMode);
-        
+
         if (_marketHoursService.IsMarketOpen(MarketMode))
         {
             StartTimer();
@@ -181,7 +181,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void StartTimer()
     {
         if (IsTimerRunning) return;
-        
+
         IsTimerRunning = true;
         CalculateAndSetInitialTime();
         _lastSecond = DateTime.Now.Second;
@@ -200,10 +200,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var now = DateTime.Now;
         var minute = now.Minute;
         var second = now.Second;
-        
+
         var secondsIntoInterval = (minute % 5) * 60 + second;
         var remainingSeconds = Math.Max(0, 300 - secondsIntoInterval);
-        
+
         TimeRemaining = TimeSpan.FromSeconds(remainingSeconds);
     }
 
@@ -217,7 +217,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _countdownTimer?.Stop();
         _marketHoursTimer?.Stop();
         _clockTimer?.Stop();
-        
+
         _settingsService?.Save();
     }
 }

@@ -45,7 +45,7 @@ public class SettingsService : ISettingsService
                 if (key.GetValue(PreNotificationSecondsKey) is int preNotificationSeconds)
                     PreNotificationSeconds = preNotificationSeconds;
 
-                if (key.GetValue(MarketModeKey) is string marketModeStr && 
+                if (key.GetValue(MarketModeKey) is string marketModeStr &&
                     Enum.TryParse<MarketMode>(marketModeStr, out var marketMode))
                     MarketMode = marketMode;
 

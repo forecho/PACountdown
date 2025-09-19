@@ -15,7 +15,7 @@ public class AudioService : IAudioService
         // Use Windows system sounds or embed custom sounds
         _tickSoundPlayer = new SoundPlayer();
         _finalTickSoundPlayer = new SoundPlayer();
-        
+
         // You can load custom sound files here:
         // _tickSoundPlayer.SoundLocation = "Resources/tick.wav";
         // _finalTickSoundPlayer.SoundLocation = "Resources/final.wav";
@@ -28,7 +28,7 @@ public class AudioService : IAudioService
             return;
 
         _lastTickPlayTime = now;
-        
+
         Task.Run(() =>
         {
             try
