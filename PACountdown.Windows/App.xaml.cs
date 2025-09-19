@@ -3,7 +3,9 @@ using Microsoft.Extensions.Hosting;
 using PACountdown.Windows.Services;
 using PACountdown.Windows.ViewModels;
 using PACountdown.Windows.Views;
+using System;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Windows;
 
@@ -12,6 +14,7 @@ namespace PACountdown.Windows;
 public partial class App : Application
 {
     private IHost? _host;
+    private string? _logFilePath;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -19,6 +22,15 @@ public partial class App : Application
         var culture = CultureInfo.GetCultureInfo("en-US");
         Thread.CurrentThread.CurrentCulture = culture;
         Thread.CurrentThread.CurrentUICulture = culture;
+
+        // Init simple log file in user AppData
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var logDir = Path.Combine(appData, "PACountdown");
+        Directory.CreateDirectory(logDir);
+        _logFilePath = Path.Combine(logDir, "app.log");
+
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        this.DispatcherUnhandledException += App_DispatcherUnhandledException;
 
         _host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
@@ -40,6 +52,18 @@ public partial class App : Application
         mainWindow.Show();
 
         base.OnStartup(e);
+    }
+
+    private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        try { File.AppendAllText(_logFilePath!, $"[UI] {DateTime.Now:o} {e.Exception}\n"); } catch { }
+        MessageBox.Show("An unexpected error occurred. The application will attempt to continue.", "PACountdown", MessageBoxButton.OK, MessageBoxImage.Error);
+        e.Handled = true;
+    }
+
+    private void CurrentDomain_UnhandledException(object? sender, UnhandledExceptionEventArgs e)
+    {
+        try { File.AppendAllText(_logFilePath!, $"[Domain] {DateTime.Now:o} {e.ExceptionObject}\n"); } catch { }
     }
 
     protected override void OnExit(ExitEventArgs e)

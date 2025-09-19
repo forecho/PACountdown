@@ -27,8 +27,21 @@ public class MarketHoursService : IMarketHoursService
 
     private bool IsUSMarketOpen()
     {
-        var easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-        var easternTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, easternTimeZone);
+        TimeZoneInfo? easternTimeZone = null;
+        try
+        {
+            easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+        }
+        catch
+        {
+            // Fallback for systems where the ID differs (e.g., some environments)
+            try { easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/New_York"); } catch { }
+        }
+
+        var utcNow = DateTime.UtcNow;
+        var easternTime = easternTimeZone != null
+            ? TimeZoneInfo.ConvertTimeFromUtc(utcNow, easternTimeZone)
+            : utcNow; // best effort fallback
 
         // Check if it's a weekday (Monday = 1, Friday = 5)
         var dayOfWeek = (int)easternTime.DayOfWeek;
