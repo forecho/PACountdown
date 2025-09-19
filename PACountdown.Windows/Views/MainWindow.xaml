@@ -10,9 +10,7 @@
         Background="#FF2D2D30"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip">
-    <Window.Icon>
-        <BitmapImage UriSource="pack://application:,,,/Assets/AppIcon.png"/>
-    </Window.Icon>
+    
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
         <StackPanel>

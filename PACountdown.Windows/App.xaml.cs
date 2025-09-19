@@ -48,8 +48,18 @@ public partial class App : Application
             })
             .Build();
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+        try
+        {
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            try { File.AppendAllText(_logFilePath!, $"[Startup] {DateTime.Now:o} {ex}\n"); } catch { }
+            MessageBox.Show("Startup failed. See log for details.", "PACountdown", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(-1);
+            return;
+        }
 
         base.OnStartup(e);
     }
