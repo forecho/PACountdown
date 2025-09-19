@@ -11,6 +11,7 @@
     <Copyright>Copyright © 2025</Copyright>
     <StartupObject>PACountdown.Windows.App</StartupObject>
     <Nullable>enable</Nullable>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>
