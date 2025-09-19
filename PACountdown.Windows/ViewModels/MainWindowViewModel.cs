@@ -52,12 +52,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _audioService = audioService;
         _marketHoursService = marketHoursService;
 
-        // Load settings
-        MarketMode = _settingsService.MarketMode;
-        PreNotificationSeconds = _settingsService.PreNotificationSeconds;
-        AreNotificationsEnabled = _settingsService.AreNotificationsEnabled;
-
-        // Initialize timers
+        // Initialize timers FIRST to avoid NRE in callbacks triggered by property changes
         _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _countdownTimer.Tick += OnCountdownTimerTick;
 
@@ -67,12 +62,16 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += OnClockTimerTick;
 
-        // Start timers
-        CheckMarketHours();
-        UpdateCurrentTime();
+        // Load settings (order matters; set MarketMode last because it triggers CheckMarketHours via callback)
+        AreNotificationsEnabled = _settingsService.AreNotificationsEnabled;
+        PreNotificationSeconds = _settingsService.PreNotificationSeconds;
+        MarketMode = _settingsService.MarketMode;
 
+        // Start timers
+        UpdateCurrentTime();
         _marketHoursTimer.Start();
         _clockTimer.Start();
+        CheckMarketHours();
     }
 
     partial void OnMarketModeChanged(MarketMode value)
