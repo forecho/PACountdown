@@ -12,7 +12,7 @@ permissions:
 jobs:
   build-macos:
     name: Build macOS
-    runs-on: macos-15
+    runs-on: macos-latest
     
     steps:
     - name: Checkout code
@@ -35,7 +35,8 @@ jobs:
 
     - name: Build and Archive
       run: |
-        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Release archive -archivePath ./build/PACountdown.xcarchive
+        mkdir -p ./build
+        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Release archive -archivePath ./build/PACountdown.xcarchive -destination 'platform=macOS'
 
     - name: Export App
       run: |
@@ -44,7 +45,13 @@ jobs:
     - name: Create macOS Zip file
       run: |
         cd ./build
-        zip -r ../PACountdown-macOS-${GITHUB_REF#refs/tags/}.zip PACountdown.app
+        if [ -f PACountdown.app ]; then
+          zip -r "../PACountdown-macOS-${GITHUB_REF#refs/tags/}.zip" PACountdown.app
+        else
+          echo "PACountdown.app not found, listing directory contents:"
+          ls -la
+          exit 1
+        fi
     
     - name: Upload macOS artifact
       uses: actions/upload-artifact@v4
@@ -74,32 +81,33 @@ jobs:
 
     - name: Publish Windows app (Self-contained)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained true `
-          -p:PublishSingleFile=true `
-          -p:IncludeNativeLibrariesForSelfExtract=true `
-          -o publish/win-x64
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
 
     - name: Publish Windows app (Framework-dependent)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained false `
-          -p:PublishSingleFile=true `
-          -o publish/win-x64-fx
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish/win-x64-fx
 
     - name: Create Windows zip files
+      shell: pwsh
       run: |
-        $version = "$env:GITHUB_REF" -replace "refs/tags/", ""
+        $version = $env:GITHUB_REF -replace "refs/tags/", ""
         
-        # Self-contained version
-        Compress-Archive -Path "publish/win-x64/*" -DestinationPath "PACountdown-Windows-SelfContained-$version.zip"
+        # Check if publish directories exist
+        if (Test-Path "publish/win-x64") {
+          Compress-Archive -Path "publish/win-x64/*" -DestinationPath "PACountdown-Windows-SelfContained-$version.zip"
+          Write-Host "Created self-contained zip: PACountdown-Windows-SelfContained-$version.zip"
+        } else {
+          Write-Host "Self-contained publish directory not found"
+          exit 1
+        }
         
-        # Framework-dependent version
-        Compress-Archive -Path "publish/win-x64-fx/*" -DestinationPath "PACountdown-Windows-FrameworkDependent-$version.zip"
+        if (Test-Path "publish/win-x64-fx") {
+          Compress-Archive -Path "publish/win-x64-fx/*" -DestinationPath "PACountdown-Windows-FrameworkDependent-$version.zip"
+          Write-Host "Created framework-dependent zip: PACountdown-Windows-FrameworkDependent-$version.zip"
+        } else {
+          Write-Host "Framework-dependent publish directory not found"
+          exit 1
+        }
 
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v4

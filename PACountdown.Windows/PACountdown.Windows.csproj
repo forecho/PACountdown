@@ -4,7 +4,6 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
     <AssemblyTitle>PACountdown for Windows</AssemblyTitle>
     <AssemblyDescription>5-minute candlestick countdown timer for stock traders</AssemblyDescription>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>

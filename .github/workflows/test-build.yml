@@ -1,0 +1,52 @@
+name: Test Build
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  test-windows-build:
+    name: Test Windows Build
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: List project files
+      run: |
+        Get-ChildItem -Recurse -Name "*.csproj"
+        Write-Host "Checking PACountdown.Windows directory:"
+        Get-ChildItem PACountdown.Windows -Name
+
+    - name: Restore dependencies
+      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj
+
+    - name: Build Windows app
+      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore
+
+    - name: Test publish (Self-contained)
+      run: |
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o test-publish/self-contained
+        Write-Host "Self-contained publish completed"
+        Get-ChildItem test-publish/self-contained
+
+  test-macos-build:
+    name: Test macOS Build  
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: List project files
+      run: |
+        find . -name "*.xcodeproj" -type d
+
+    - name: Build macOS app (Debug)
+      run: |
+        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Debug build -destination 'platform=macOS'

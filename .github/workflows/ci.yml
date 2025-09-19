@@ -9,7 +9,7 @@ on:
 jobs:
   test-macos-build:
     name: Test macOS Build
-    runs-on: macos-15
+    runs-on: macos-latest
     
     steps:
     - name: Checkout code
@@ -47,23 +47,11 @@ jobs:
 
     - name: Test publish (Self-contained)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained true `
-          -p:PublishSingleFile=true `
-          --no-build `
-          -o test-publish/self-contained
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --no-build -o test-publish/self-contained
 
     - name: Test publish (Framework-dependent)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained false `
-          -p:PublishSingleFile=true `
-          --no-build `
-          -o test-publish/framework-dependent
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true --no-build -o test-publish/framework-dependent
 
   lint-and-format:
     name: Code Quality
