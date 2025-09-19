@@ -24,14 +24,14 @@ jobs:
         Get-ChildItem PACountdown.Windows -Name
 
     - name: Restore dependencies
-      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj
+      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -p:EnableWindowsTargeting=true
 
     - name: Build Windows app
-      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore
+      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -p:EnableWindowsTargeting=true
 
     - name: Test publish (Self-contained)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o test-publish/self-contained
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o test-publish/self-contained
         Write-Host "Self-contained publish completed"
         Get-ChildItem test-publish/self-contained
 

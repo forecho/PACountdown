@@ -107,20 +107,20 @@ jobs:
     - name: Restore dependencies
       run: |
         Write-Host "Restoring dependencies..."
-        dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -v normal
+        dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -v normal -p:EnableWindowsTargeting=true
 
     - name: Build Windows app
       run: |
         Write-Host "Building Windows app..."
-        dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -v normal
+        dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -v normal -p:EnableWindowsTargeting=true
 
     - name: Publish Windows app (Self-contained)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableWindowsTargeting=true -o publish/win-x64
 
     - name: Publish Windows app (Framework-dependent)
       run: |
-        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o publish/win-x64-fx
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o publish/win-x64-fx
 
     - name: Create Windows zip files
       shell: pwsh
