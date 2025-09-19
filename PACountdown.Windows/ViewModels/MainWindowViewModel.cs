@@ -145,12 +145,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                     _audioService.PlayTickSound();
                 }
             }
-
-            // Reset timer when it reaches zero
-            if (TimeRemaining.TotalSeconds == 0)
-            {
-                Timer timer = new Timer(_ => CalculateAndSetInitialTime(), null, 500, Timeout.Infinite);
-            }
         }
     }
 
