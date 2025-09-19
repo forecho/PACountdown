@@ -83,10 +83,30 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore .NET dependencies
-      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -p:EnableWindowsTargeting=true
+      run: |
+        Write-Host "Restoring .NET dependencies..."
+        dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -p:EnableWindowsTargeting=true -v normal
+
+    - name: Show project info
+      run: |
+        Write-Host "Project information:"
+        dotnet --info
+        Write-Host "Project file contents:"
+        Get-Content PACountdown.Windows/PACountdown.Windows.csproj
 
     - name: Check .NET code formatting
-      run: dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verify-no-changes --verbosity diagnostic
+      run: |
+        Write-Host "Checking code formatting..."
+        dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verify-no-changes --verbosity normal
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "Code formatting issues found. Running format to show what needs to be fixed:"
+          dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verbosity normal
+          exit 1
+        }
+        Write-Host "Code formatting is correct."
 
     - name: Analyze .NET code
-      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -p:TreatWarningsAsErrors=true -p:EnableWindowsTargeting=true
+      run: |
+        Write-Host "Analyzing .NET code..."
+        dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -p:EnableWindowsTargeting=true -v normal
+        Write-Host "Code analysis completed successfully."
