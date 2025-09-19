@@ -53,3 +53,11 @@ fastlane/test_output
 Icon?
 ehthumbs.db
 Thumbs.db
+
+# .NET
+[Oo]bj/
+[Bb]in/
+.vs/
+.idea/
+*.user
+*.suo
