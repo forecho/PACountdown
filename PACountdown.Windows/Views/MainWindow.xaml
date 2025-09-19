@@ -1,40 +1,46 @@
 <Window x:Class="PACountdown.Windows.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:PACountdown.Windows.ViewModels"
         Title="PACountdown - Windows" 
         Height="600" 
         Width="480"
         MinHeight="500"
         MinWidth="400"
-        Background="{StaticResource PrimaryBackgroundBrush}"
+        Background="#FF2D2D30"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip">
-    
-    <Window.DataContext>
-        <vm:MainWindowViewModel/>
-    </Window.DataContext>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-        <StackPanel Spacing="0">
+        <StackPanel>
             
             <!-- Current Time Display -->
-            <Border Style="{StaticResource CardStyle}">
+            <Border Background="#FF3E3E42" CornerRadius="8" Padding="20" Margin="0,10">
                 <StackPanel>
                     <TextBlock Text="{Binding CurrentTime}" 
-                               Style="{StaticResource ClockTextStyle}"/>
+                               Foreground="#FFCCCCCC"
+                               FontSize="32"
+                               FontWeight="Light"
+                               FontFamily="Consolas, Courier New"
+                               HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
 
             <!-- Countdown Timer -->
-            <Border Style="{StaticResource CardStyle}">
+            <Border Background="#FF3E3E42" CornerRadius="8" Padding="20" Margin="0,10">
                 <StackPanel>
                     <TextBlock Text="5-Min Interval Countdown" 
-                               Style="{StaticResource SubHeaderTextStyle}"
+                               Foreground="#FF999999"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
                                Margin="0,0,0,12"/>
                     
                     <TextBlock Text="{Binding TimeRemainingDisplay}" 
-                               Style="{StaticResource CountdownTextStyle}"/>
+                               Foreground="#FFCCCCCC"
+                               FontSize="72"
+                               FontWeight="Bold"
+                               FontFamily="Consolas, Courier New"
+                               HorizontalAlignment="Center"/>
                     
                     <TextBlock Text="{Binding MarketStatusMessage}" 
                                FontSize="16"
@@ -43,12 +49,10 @@
                                Margin="0,8,0,0">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#FFF44747"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsTimerRunning}" Value="True">
-                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsTimerRunning}" Value="False">
-                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                        <Setter Property="Foreground" Value="#FF4EC9B0"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -58,31 +62,19 @@
             </Border>
 
             <!-- Controls -->
-            <Border Style="{StaticResource CardStyle}">
+            <Border Background="#FF3E3E42" CornerRadius="8" Padding="20" Margin="0,10">
                 <StackPanel>
                     
                     <!-- Market Mode Switch -->
                     <Button Command="{Binding SwitchMarketModeCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Margin="0,0,0,16">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🌍" FontSize="16" Margin="0,0,8,0"/>
-                            <TextBlock>
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding MarketMode}" Value="US">
-                                                <Setter Property="Text" Value="Switch to Global"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding MarketMode}" Value="Global">
-                                                <Setter Property="Text" Value="Switch to US"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </StackPanel>
-                    </Button>
+                            Background="Transparent"
+                            Foreground="#FFCCCCCC"
+                            BorderBrush="#FF999999"
+                            BorderThickness="1"
+                            Padding="16,8"
+                            Margin="0,0,0,16"
+                            Cursor="Hand"
+                            Content="🌍 Switch Mode"/>
 
                     <!-- Notification Controls -->
                     <Grid Margin="0,0,0,16">
@@ -93,55 +85,43 @@
                         
                         <Button Grid.Column="0"
                                 Command="{Binding ToggleNotificationsCommand}"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Margin="0,0,8,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock FontSize="16" Margin="0,0,8,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding AreNotificationsEnabled}" Value="True">
-                                                    <Setter Property="Text" Value="🔊"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding AreNotificationsEnabled}" Value="False">
-                                                    <Setter Property="Text" Value="🔇"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock>
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding AreNotificationsEnabled}" Value="True">
-                                                    <Setter Property="Text" Value="Mute Notifications"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding AreNotificationsEnabled}" Value="False">
-                                                    <Setter Property="Text" Value="Unmute Notifications"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
+                                Background="#FF007ACC"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="16,8"
+                                Margin="0,0,8,0"
+                                Cursor="Hand">
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="🔇 Unmute Notifications"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AreNotificationsEnabled}" Value="True">
+                                                <Setter Property="Text" Value="🔊 Mute Notifications"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Button>
                         
                         <Button Grid.Column="1"
                                 Command="{Binding TestSoundCommand}"
-                                Style="{StaticResource SecondaryButtonStyle}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🔊" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="Test Sound"/>
-                            </StackPanel>
-                        </Button>
+                                Background="Transparent"
+                                Foreground="#FFCCCCCC"
+                                BorderBrush="#FF999999"
+                                BorderThickness="1"
+                                Padding="16,8"
+                                Cursor="Hand"
+                                Content="🔊 Test Sound"/>
                     </Grid>
 
                     <!-- Notification Settings -->
                     <StackPanel>
                         <TextBlock Text="Notification Settings" 
-                                   Style="{StaticResource SubHeaderTextStyle}"
-                                   HorizontalAlignment="Left"
+                                   Foreground="#FF999999"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
                                    Margin="0,0,0,8"/>
                         
                         <Grid>
@@ -154,7 +134,7 @@
                             
                             <TextBlock Grid.Column="0"
                                        VerticalAlignment="Center"
-                                       Foreground="{StaticResource PrimaryTextBrush}">
+                                       Foreground="#FFCCCCCC">
                                 <Run Text="Pre-notification time: "/>
                                 <Run Text="{Binding PreNotificationSeconds}"/>
                                 <Run Text=" seconds"/>
@@ -163,8 +143,12 @@
                             <Button Grid.Column="1" 
                                     Content="-"
                                     Width="30" Height="30"
-                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Background="Transparent"
+                                    Foreground="#FFCCCCCC"
+                                    BorderBrush="#FF999999"
+                                    BorderThickness="1"
                                     Margin="8,0,4,0"
+                                    Cursor="Hand"
                                     Click="DecreasePreNotification"/>
                             
                             <TextBlock Grid.Column="2"
@@ -172,14 +156,18 @@
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Center"
                                        Width="30"
-                                       Foreground="{StaticResource PrimaryTextBrush}"
+                                       Foreground="#FFCCCCCC"
                                        FontWeight="Bold"/>
                             
                             <Button Grid.Column="3"
                                     Content="+"
                                     Width="30" Height="30"
-                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Background="Transparent"
+                                    Foreground="#FFCCCCCC"
+                                    BorderBrush="#FF999999"
+                                    BorderThickness="1"
                                     Margin="4,0,0,0"
+                                    Cursor="Hand"
                                     Click="IncreasePreNotification"/>
                         </Grid>
                     </StackPanel>

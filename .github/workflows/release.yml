@@ -18,6 +18,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Verify Xcode project
+      run: |
+        echo "Checking Xcode project..."
+        if [ -d "PACountdown.xcodeproj" ]; then
+          echo "✅ Xcode project found"
+          xcodebuild -list -project PACountdown.xcodeproj
+        else
+          echo "❌ Xcode project not found"
+          find . -name "*.xcodeproj" -type d
+          exit 1
+        fi
+
     - name: Create ExportOptions.plist
       run: |
         cat <<EOF > ExportOptions.plist
@@ -35,8 +47,15 @@ jobs:
 
     - name: Build and Archive
       run: |
+        echo "Creating build directory..."
         mkdir -p ./build
-        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Release archive -archivePath ./build/PACountdown.xcarchive -destination 'platform=macOS'
+        echo "Building and archiving..."
+        xcodebuild -project PACountdown.xcodeproj \
+          -scheme PACountdown \
+          -configuration Release \
+          archive \
+          -archivePath ./build/PACountdown.xcarchive \
+          -destination 'platform=macOS'
 
     - name: Export App
       run: |
@@ -73,11 +92,27 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Verify project structure
+      run: |
+        Write-Host "Checking project files..."
+        if (Test-Path "PACountdown.Windows/PACountdown.Windows.csproj") {
+          Write-Host "✅ Project file found"
+          Get-Content PACountdown.Windows/PACountdown.Windows.csproj | Select-Object -First 10
+        } else {
+          Write-Host "❌ Project file not found"
+          Get-ChildItem -Recurse -Name "*.csproj"
+          exit 1
+        }
+
     - name: Restore dependencies
-      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj
+      run: |
+        Write-Host "Restoring dependencies..."
+        dotnet restore PACountdown.Windows/PACountdown.Windows.csproj -v normal
 
     - name: Build Windows app
-      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore
+      run: |
+        Write-Host "Building Windows app..."
+        dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -v normal
 
     - name: Publish Windows app (Self-contained)
       run: |
