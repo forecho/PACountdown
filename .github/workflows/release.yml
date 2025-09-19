@@ -64,7 +64,7 @@ jobs:
     - name: Create macOS Zip file
       run: |
         cd ./build
-        if [ -f PACountdown.app ]; then
+        if [ -d "PACountdown.app" ]; then
           zip -r "../PACountdown-macOS-${GITHUB_REF#refs/tags/}.zip" PACountdown.app
         else
           echo "PACountdown.app not found, listing directory contents:"
