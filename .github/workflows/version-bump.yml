@@ -1,0 +1,108 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      custom_version:
+        description: 'Custom version (optional, overrides version_type)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install semver tool
+      run: npm install -g semver
+
+    - name: Get current version
+      id: current_version
+      run: |
+        # Try to get version from git tags, fallback to v1.0.0 if no tags exist
+        CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+        echo "current_version=${CURRENT_VERSION#v}" >> $GITHUB_OUTPUT
+        echo "Current version: ${CURRENT_VERSION#v}"
+
+    - name: Calculate new version
+      id: new_version
+      run: |
+        CURRENT="${{ steps.current_version.outputs.current_version }}"
+        
+        if [ -n "${{ github.event.inputs.custom_version }}" ]; then
+          NEW_VERSION="${{ github.event.inputs.custom_version }}"
+        else
+          NEW_VERSION=$(semver -i ${{ github.event.inputs.version_type }} $CURRENT)
+        fi
+        
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "New version: $NEW_VERSION"
+
+    - name: Update Windows project version
+      run: |
+        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+        
+        # Update .csproj file
+        sed -i "s/<AssemblyVersion>.*<\/AssemblyVersion>/<AssemblyVersion>$NEW_VERSION.0<\/AssemblyVersion>/" PACountdown.Windows/PACountdown.Windows.csproj
+        sed -i "s/<FileVersion>.*<\/FileVersion>/<FileVersion>$NEW_VERSION.0<\/FileVersion>/" PACountdown.Windows/PACountdown.Windows.csproj
+
+    - name: Update macOS project version
+      run: |
+        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+        
+        # This would update Info.plist if it exists in the project
+        # For now, we'll create a simple version file
+        echo "$NEW_VERSION" > VERSION.txt
+
+    - name: Commit version changes
+      run: |
+        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+        
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        git add .
+        git commit -m "Bump version to $NEW_VERSION" || exit 0
+        git push
+
+    - name: Create and push tag
+      run: |
+        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+        
+        git tag "v$NEW_VERSION"
+        git push origin "v$NEW_VERSION"
+
+    - name: Create release summary
+      run: |
+        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+        CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+        
+        echo "## Version Bump Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Previous version:** $CURRENT_VERSION" >> $GITHUB_STEP_SUMMARY
+        echo "- **New version:** $NEW_VERSION" >> $GITHUB_STEP_SUMMARY
+        echo "- **Bump type:** ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The release workflow will be triggered automatically to build and publish the new version." >> $GITHUB_STEP_SUMMARY

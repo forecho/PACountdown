@@ -1,17 +1,19 @@
-name: Create Release
+name: Build and Release
 
 on:
   push:
     tags:
       - 'v*' # Trigger on tags like v1.0, v1.0.1, etc.
+  workflow_dispatch: # Allow manual trigger
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build-macos:
+    name: Build macOS
     runs-on: macos-15
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -39,15 +41,149 @@ jobs:
       run: |
         xcodebuild -exportArchive -archivePath ./build/PACountdown.xcarchive -exportPath ./build -exportOptionsPlist ExportOptions.plist
 
-    - name: Create Zip file
+    - name: Create macOS Zip file
       run: |
         cd ./build
-        zip -r ../PACountdown.zip PACountdown.app
+        zip -r ../PACountdown-macOS-${GITHUB_REF#refs/tags/}.zip PACountdown.app
     
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PACountdown-macOS
+        path: PACountdown-macOS-*.zip
+        retention-days: 7
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj
+
+    - name: Build Windows app
+      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore
+
+    - name: Publish Windows app (Self-contained)
+      run: |
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -o publish/win-x64
+
+    - name: Publish Windows app (Framework-dependent)
+      run: |
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained false `
+          -p:PublishSingleFile=true `
+          -o publish/win-x64-fx
+
+    - name: Create Windows zip files
+      run: |
+        $version = "$env:GITHUB_REF" -replace "refs/tags/", ""
+        
+        # Self-contained version
+        Compress-Archive -Path "publish/win-x64/*" -DestinationPath "PACountdown-Windows-SelfContained-$version.zip"
+        
+        # Framework-dependent version
+        Compress-Archive -Path "publish/win-x64-fx/*" -DestinationPath "PACountdown-Windows-FrameworkDependent-$version.zip"
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: PACountdown-Windows
+        path: |
+          PACountdown-Windows-*.zip
+        retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Display structure of downloaded files
+      run: ls -la artifacts/
+
+    - name: Create Release Notes
+      run: |
+        cat > release_notes.md << 'EOF'
+        ## PACountdown Release ${GITHUB_REF#refs/tags/}
+        
+        A 5-minute candlestick countdown timer for stock traders.
+        
+        ### 📦 Downloads
+        
+        **macOS:**
+        - `PACountdown-macOS-*.zip` - macOS application bundle
+        
+        **Windows:**
+        - `PACountdown-Windows-SelfContained-*.zip` - Standalone executable (no .NET required)
+        - `PACountdown-Windows-FrameworkDependent-*.zip` - Requires .NET 8.0 Runtime
+        
+        ### 🚀 Features
+        
+        - **Automatic 5-Minute Countdown**: Syncs to real-world 5-minute intervals
+        - **Market Hours Awareness**: US stock market hours (9:30 AM - 4:00 PM ET) or 24/7 global mode
+        - **Sound Alerts**: Configurable pre-notification alerts
+        - **Cross-Platform**: Native macOS and Windows applications
+        - **Settings Persistence**: Saves your preferences automatically
+        - **Multilingual**: English and Chinese support (Windows version)
+        
+        ### 💻 System Requirements
+        
+        **macOS:**
+        - macOS 12.0 (Monterey) or later
+        - Apple Silicon or Intel processor
+        
+        **Windows:**
+        - Windows 10 version 1909 or later (Windows 11 recommended)
+        - .NET 8.0 Runtime (for framework-dependent version only)
+        
+        ### 📝 Installation
+        
+        **macOS:**
+        1. Download and extract `PACountdown-macOS-*.zip`
+        2. Move `PACountdown.app` to Applications folder
+        3. Right-click and select "Open" on first launch
+        
+        **Windows:**
+        1. Download the appropriate zip file
+        2. Extract and run `PACountdown.Windows.exe`
+        3. For self-contained version: No additional setup required
+        4. For framework-dependent version: Install [.NET 8.0 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) if not already installed
+        EOF
+
     - name: Create GitHub Release
-      id: create_release
       uses: softprops/action-gh-release@v2
       with:
-        files: PACountdown.zip
+        files: |
+          artifacts/PACountdown-macOS/*
+          artifacts/PACountdown-Windows/*
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

@@ -1,0 +1,68 @@
+using System;
+using System.Media;
+using System.Threading.Tasks;
+
+namespace PACountdown.Windows.Services;
+
+public class AudioService : IAudioService
+{
+    private readonly SoundPlayer _tickSoundPlayer;
+    private readonly SoundPlayer _finalTickSoundPlayer;
+    private DateTime _lastTickPlayTime = DateTime.MinValue;
+
+    public AudioService()
+    {
+        // Use Windows system sounds or embed custom sounds
+        _tickSoundPlayer = new SoundPlayer();
+        _finalTickSoundPlayer = new SoundPlayer();
+        
+        // You can load custom sound files here:
+        // _tickSoundPlayer.SoundLocation = "Resources/tick.wav";
+        // _finalTickSoundPlayer.SoundLocation = "Resources/final.wav";
+    }
+
+    public void PlayTickSound()
+    {
+        var now = DateTime.Now;
+        if (now.Subtract(_lastTickPlayTime).TotalMilliseconds < 1000)
+            return;
+
+        _lastTickPlayTime = now;
+        
+        Task.Run(() =>
+        {
+            try
+            {
+                // Use Windows system sound for tick
+                SystemSounds.Beep.Play();
+            }
+            catch (Exception)
+            {
+                // Fallback to console beep
+                Console.Beep(800, 100);
+            }
+        });
+    }
+
+    public void PlayFinalTickSound()
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                // Use Windows system sound for final tick
+                SystemSounds.Exclamation.Play();
+            }
+            catch (Exception)
+            {
+                // Fallback to console beep
+                Console.Beep(1000, 500);
+            }
+        });
+    }
+
+    public void TestSound()
+    {
+        PlayTickSound();
+    }
+}

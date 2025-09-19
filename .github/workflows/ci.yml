@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-macos-build:
+    name: Test macOS Build
+    runs-on: macos-15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build macOS app (Debug)
+      run: |
+        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Debug build -destination 'platform=macOS'
+
+    - name: Build macOS app (Release)
+      run: |
+        xcodebuild -project PACountdown.xcodeproj -scheme PACountdown -configuration Release build -destination 'platform=macOS'
+
+  test-windows-build:
+    name: Test Windows Build
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj
+
+    - name: Build Windows app (Debug)
+      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Debug --no-restore
+
+    - name: Build Windows app (Release)
+      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore
+
+    - name: Test publish (Self-contained)
+      run: |
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          --no-build `
+          -o test-publish/self-contained
+
+    - name: Test publish (Framework-dependent)
+      run: |
+        dotnet publish PACountdown.Windows/PACountdown.Windows.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained false `
+          -p:PublishSingleFile=true `
+          --no-build `
+          -o test-publish/framework-dependent
+
+  lint-and-format:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore .NET dependencies
+      run: dotnet restore PACountdown.Windows/PACountdown.Windows.csproj
+
+    - name: Check .NET code formatting
+      run: dotnet format PACountdown.Windows/PACountdown.Windows.csproj --verify-no-changes --verbosity diagnostic
+
+    - name: Analyze .NET code
+      run: dotnet build PACountdown.Windows/PACountdown.Windows.csproj -c Release --no-restore -p:TreatWarningsAsErrors=true

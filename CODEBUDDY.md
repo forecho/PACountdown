@@ -21,11 +21,11 @@ Architecture overview
 - App entry: PACountdownApp in PACountdown/PACountdownApp.swift sets up SwiftData ModelContainer and shows ContentView
 - UI layer: SwiftUI views in PACountdown/ContentView.swift render current clock, 5-minute countdown, market status, and controls for notifications and pre-notification seconds
 - View model: TimerViewModel in PACountdown/TimerViewModel.swift manages countdown state, market-hours gating, sounds, and user defaults
-  - Maintains timeRemaining, isTimerRunning, marketStatusMessage, areNotificationsEnabled, preNotificationSeconds, currentTime
+  - Maintains timeRemaining, isTimerRunning, marketStatusMessage, areNotificationsEnabled, preNotificationSeconds, currentTime, marketMode
   - Schedules three timers: a high-frequency second-tracking countdown timer, a minute-based market-hours checker, and a 1s clock updater
-  - Market hours logic uses America/New_York timezone, open 09:30–16:00, weekdays
+  - Market hours logic uses America/New_York timezone, open 09:30–16:00, weekdays (US mode) or runs 24/7 (Global mode)
   - Sound cues (macOS-only) use NSSound("Tink") for ticks and NSSound("Glass") at zero
-  - Persists preNotificationSeconds in UserDefaults under key preNotificationSeconds
+  - Persists preNotificationSeconds and marketMode in UserDefaults
 - Data model: SwiftData @Model Item in PACountdown/Item.swift; ModelContainer configured in PACountdownApp.swift (not currently used by UI logic)
 - Localization: en.lproj and zh-Hans.lproj resource folders exist for strings; market status message is passed through LocalizedStringKey in ContentView
 - Assets: Assets.xcassets contains app assets; PACountdown.entitlements present for app capabilities
@@ -48,3 +48,5 @@ Conventions
 
 - SwiftUI + Combine; avoid blocking main thread; keep timers on RunLoop.common
 - Persist simple settings in UserDefaults; use SwiftData for structured persistence via @Model if expanded later
+- macOS-specific features (sounds) are wrapped in #if os(macOS) guards
+- Timer synchronization uses high-frequency polling (0.05s) to detect system clock second changes for precision
