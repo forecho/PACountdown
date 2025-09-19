@@ -136,11 +136,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             // Handle sound notifications
             if (AreNotificationsEnabled)
             {
-                if (TimeRemaining.TotalSeconds == 0)
+                if (TimeRemaining.TotalSeconds == 1)
                 {
+                    // Play distinct sound on the last second
                     _audioService.PlayFinalTickSound();
                 }
-                else if (TimeRemaining.TotalSeconds < PreNotificationSeconds && TimeRemaining.TotalSeconds > 0)
+                else if (TimeRemaining.TotalSeconds <= PreNotificationSeconds && TimeRemaining.TotalSeconds > 1)
                 {
                     _audioService.PlayTickSound();
                 }

@@ -18,8 +18,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Set default culture
-        var culture = CultureInfo.GetCultureInfo("en-US");
+        // Use OS culture
+        var culture = CultureInfo.CurrentUICulture;
         Thread.CurrentThread.CurrentCulture = culture;
         Thread.CurrentThread.CurrentUICulture = culture;
 

@@ -9,6 +9,7 @@ public class AudioService : IAudioService
     private readonly SoundPlayer _tickSoundPlayer;
     private readonly SoundPlayer _finalTickSoundPlayer;
     private DateTime _lastTickPlayTime = DateTime.MinValue;
+    private readonly object _lock = new object();
 
     public AudioService()
     {
@@ -33,13 +34,14 @@ public class AudioService : IAudioService
         {
             try
             {
-                // Use Windows system sound for tick
-                SystemSounds.Beep.Play();
+                lock (_lock)
+                {
+                    SystemSounds.Asterisk.Play();
+                }
             }
             catch (Exception)
             {
-                // Fallback to console beep
-                Console.Beep(800, 100);
+                try { Console.Beep(800, 80); } catch { }
             }
         });
     }
@@ -50,13 +52,14 @@ public class AudioService : IAudioService
         {
             try
             {
-                // Use Windows system sound for final tick
-                SystemSounds.Exclamation.Play();
+                lock (_lock)
+                {
+                    SystemSounds.Exclamation.Play();
+                }
             }
             catch (Exception)
             {
-                // Fallback to console beep
-                Console.Beep(1000, 500);
+                try { Console.Beep(1000, 300); } catch { }
             }
         });
     }

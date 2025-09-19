@@ -1,7 +1,8 @@
 <Window x:Class="PACountdown.Windows.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="PACountdown - Windows" 
+        xmlns:properties="clr-namespace:PACountdown.Windows.Properties"
+        Title="{x:Static properties:Resources.AppTitle}" 
         Height="600" 
         Width="480"
         MinHeight="500"
@@ -9,6 +10,9 @@
         Background="#FF2D2D30"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip">
+    <Window.Icon>
+        <BitmapImage UriSource="pack://application:,,,/Assets/AppIcon.png"/>
+    </Window.Icon>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
         <StackPanel>
